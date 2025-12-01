@@ -18,6 +18,7 @@ import {
   Filter,
   ArrowRight,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -39,38 +40,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
 
-// === CAROUSEL + 3D IMPORTS ===
-import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useState, useEffect, useRef, Suspense } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+// Carousel + 3D
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from "@/components/ui/carousel";
-import {
-  Target,
-  TrendingUp,
-  Users,
-  Award,
-  Sparkles,
-  Shield,
-  BarChart3,
-  Zap,
-  Rocket,
-  DollarSign,
-  Star,
-  ArrowRight,
-} from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
 import { HeroScene } from "@/components/3d/HeroScene";
-// ============================
 
+// ====================== DADOS DOS PRODUTOS ======================
 interface Product {
   id: number;
   name: string;
@@ -147,7 +130,7 @@ type SortOption = "relevance" | "price-asc" | "price-desc" | "popular" | "newest
 type CategoryFilter = "all" | "Digital" | "Premium" | "VIP" | "Enterprise";
 
 const Sales = () => {
-  // === CAROUSEL 3D + PARALLAX ===
+  // ================== CAROUSEL 3D + PARALLAX ==================
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, -100]);
   const opacity1 = useTransform(scrollY, [0, 500], [1, 0]);
@@ -162,7 +145,7 @@ const Sales = () => {
     setCurrent(api.selectedScrollSnap());
     api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
-  // ===============================
+  // ============================================================
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -189,9 +172,8 @@ const Sales = () => {
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
-    if (categoryFilter !== "all") {
-      result = result.filter((p) => p.category === categoryFilter);
-    }
+    if (categoryFilter !== "all") result = result.filter(p => p.category === categoryFilter);
+
     switch (sortOption) {
       case "price-asc": result.sort((a, b) => a.price - b.price); break;
       case "price-desc": result.sort((a, b) => b.price - a.price); break;
@@ -204,9 +186,9 @@ const Sales = () => {
 
   return (
     <div className="min-h-screen bg-gradient-tech">
-      {/* HERO COM CAROUSEL 3D DA HOME */}
+      {/* ================== HERO COM CAROUSEL 3D ================== */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Carousel de fundo */}
+        {/* Background Carousel */}
         <div className="absolute inset-0 -z-10">
           <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full h-full" opts={{ loop: true }}>
             <CarouselContent className="h-screen">
@@ -297,27 +279,14 @@ const Sales = () => {
         </div>
 
         {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30"
-        >
-          <motion.div
-            animate={{ y: [0, 15, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-7 h-12 border-2 border-white/50 rounded-full flex justify-center"
-          >
-            <motion.div
-              animate={{ y: [0, 20, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-1.5 h-4 bg-white rounded-full mt-3"
-            />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
+          <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 2, repeat: Infinity }} className="w-7 h-12 border-2 border-white/50 rounded-full flex justify-center">
+            <motion.div animate={{ y: [0, 20, 0] }} transition={{ duration: 2, repeat: Infinity }} className="w-1.5 h-4 bg-white rounded-full mt-3" />
           </motion.div>
         </motion.div>
       </section>
 
-      {/* === TODO O RESTO DO SEU CÓDIGO ORIGINAL (100% INALTERADO) === */}
+      {/* ================== FILTROS E PRODUTOS (100% ORIGINAL) ================== */}
       <section className="py-8 px-4 border-b border-border/30">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
@@ -342,9 +311,7 @@ const Sales = () => {
                 <span className="text-sm font-medium text-muted-foreground">Ordenar por:</span>
               </div>
               <Select value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
-                <SelectTrigger className="w-full lg:w-[200px]">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-full lg:w-[200px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="relevance">Relevância</SelectItem>
                   <SelectItem value="popular">Mais Vendidos</SelectItem>
@@ -369,12 +336,8 @@ const Sales = () => {
         <div className="container mx-auto">
           {filteredAndSortedProducts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg mb-4">
-                Nenhum produto encontrado nesta categoria.
-              </p>
-              <Button onClick={() => setCategoryFilter("all")} variant="outline">
-                Ver todos os produtos
-              </Button>
+              <p className="text-muted-foreground text-lg mb-4">Nenhum produto encontrado nesta categoria.</p>
+              <Button onClick={() => setCategoryFilter("all")} variant="outline">Ver todos os produtos</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -387,54 +350,29 @@ const Sales = () => {
                 >
                   <Card className="h-full group hover:shadow-glow-primary transition-smooth overflow-hidden border-border/50">
                     <div className="relative overflow-hidden">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-48 object-cover group-hover:scale-110 transition-smooth"
-                      />
-                      {product.badge && (
-                        <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground">
-                          {product.badge}
-                        </Badge>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-20 transition-smooth"></div>
+                      <img src={product.image} alt={product.name} className="w-full h-48 object-cover group-hover:scale-110 transition-smooth" />
+                      {product.badge && <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground">{product.badge}</Badge>}
+                      <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-20 transition-smooth" />
                     </div>
 
                     <CardHeader>
                       <div className="flex items-start justify-between gap-2">
                         <CardTitle className="text-xl">{product.name}</CardTitle>
-                        <Badge variant="outline" className="text-xs">
-                          {product.category}
-                        </Badge>
+                        <Badge variant="outline" className="text-xs">{product.category}</Badge>
                       </div>
-                      <CardDescription className="line-clamp-2">
-                        {product.description}
-                      </CardDescription>
+                      <CardDescription className="line-clamp-2">{product.description}</CardDescription>
                     </CardHeader>
 
                     <CardContent>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold text-gradient-primary">
-                          R$ {product.price}
-                        </span>
-                        {product.originalPrice && (
-                          <span className="text-sm text-muted-foreground line-through">
-                            R$ {product.originalPrice}
-                          </span>
-                        )}
+                        <span className="text-3xl font-bold text-gradient-primary">R$ {product.price}</span>
+                        {product.originalPrice && <span className="text-sm text-muted-foreground line-through">R$ {product.originalPrice}</span>}
                       </div>
-                      {product.originalPrice && (
-                        <p className="text-sm text-accent mt-2">
-                          Economize R$ {product.originalPrice - product.price}
-                        </p>
-                      )}
+                      {product.originalPrice && <p className="text-sm text-accent mt-2">Economize R$ {product.originalPrice - product.price}</p>}
                     </CardContent>
 
-                    <CardFooter className="flex gap-2">
-                      <Button
-                        onClick={() => handleBuyClick(product)}
-                        className="flex-1 bg-gradient-primary hover:shadow-glow-primary"
-                      >
+                    <CardFooter>
+                      <Button onClick={() => handleBuyClick(product)} className="w-full bg-gradient-primary hover:shadow-glow-primary">
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Comprar Agora
                       </Button>
@@ -447,86 +385,57 @@ const Sales = () => {
         </div>
       </section>
 
+      {/* Seção de benefícios */}
       <section className="py-16 px-4 bg-card/30">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="p-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-                <Check className="w-8 h-8 text-primary" />
-              </div>
+              <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center"><Check className="w-8 h-8 text-primary" /></div>
               <h3 className="text-xl font-bold mb-2">Garantia de Qualidade</h3>
-              <p className="text-muted-foreground">
-                Todos os produtos com garantia de satisfação ou seu dinheiro de volta
-              </p>
+              <p className="text-muted-foreground">Todos os produtos com garantia de satisfação ou seu dinheiro de volta</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="p-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-secondary/10 rounded-full flex items-center justify-center">
-                <Star className="w-8 h-8 text-secondary" />
-              </div>
+              <div className="w-16 h-16 mx-auto mb-4 bg-secondary/10 rounded-full flex items-center justify-center"><Star className="w-8 h-8 text-secondary" /></div>
               <h3 className="text-xl font-bold mb-2">Suporte Premium</h3>
-              <p className="text-muted-foreground">
-                Atendimento especializado para tirar todas as suas dúvidas
-              </p>
+              <p className="text-muted-foreground">Atendimento especializado para tirar todas as suas dúvidas</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="p-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-full flex items-center justify-center">
-                <Zap className="w-8 h-8 text-accent" />
-              </div>
+              <div className="w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-full flex items-center justify-center"><Zap className="w-8 h-8 text-accent" /></div>
               <h3 className="text-xl font-bold mb-2">Acesso Instantâneo</h3>
-              <p className="text-muted-foreground">
-                Receba acesso imediato após a confirmação do pagamento
-              </p>
+              <p className="text-muted-foreground">Receba acesso imediato após a confirmação do pagamento</p>
             </motion.div>
           </div>
         </div>
       </section>
 
+      {/* Dialog de compra */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl">Confirmar Compra</DialogTitle>
-            <DialogDescription>
-              Você está prestes a adquirir um produto premium
-            </DialogDescription>
+            <DialogDescription>Você está prestes a adquirir um produto premium</DialogDescription>
           </DialogHeader>
 
           {selectedProduct && (
             <div className="space-y-4">
               <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-40 object-cover rounded-lg" />
-
               <div>
                 <h3 className="font-bold text-lg mb-1">{selectedProduct.name}</h3>
                 <p className="text-sm text-muted-foreground mb-3">{selectedProduct.description}</p>
-
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="text-3xl font-bold text-gradient-primary">R$ {selectedProduct.price}</span>
-                  {selectedProduct.originalPrice && (
-                    <span className="text-sm text-muted-foreground line-through">R$ {selectedProduct.originalPrice}</span>
-                  )}
+                  {selectedProduct.originalPrice && <span className="text-sm text-muted-foreground line-through">R$ {selectedProduct.originalPrice}</span>}
                 </div>
-
                 <div className="space-y-2 bg-muted/20 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span>Acesso imediato ao conteúdo</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span>Suporte premium incluído</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-primary" />
-                    <span>Garantia de 30 dias</span>
-                  </div>
+                  <div className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-primary" /><span>Acesso imediato ao conteúdo</span></div>
+                  <div className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-primary" /><span>Suporte premium incluído</span></div>
+                  <div className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-primary" /><span>Garantia de 30 dias</span></div>
                 </div>
               </div>
-
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">
-                  Cancelar
-                </Button>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">Cancelar</Button>
                 <Button onClick={handleConfirmPurchase} className="flex-1 bg-gradient-primary hover:shadow-glow-primary">
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Adicionar ao Carrinho
