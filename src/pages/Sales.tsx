@@ -40,12 +40,30 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
 
 // === CAROUSEL + 3D IMPORTS ===
+import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  type CarouselApi,
 } from "@/components/ui/carousel";
+import {
+  Target,
+  TrendingUp,
+  Users,
+  Award,
+  Sparkles,
+  Shield,
+  BarChart3,
+  Zap,
+  Rocket,
+  DollarSign,
+  Star,
+  ArrowRight,
+} from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
