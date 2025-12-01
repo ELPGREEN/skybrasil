@@ -14,10 +14,22 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  type CarouselApi,
 } from "@/components/ui/carousel";
+import {
+  Target,
+  TrendingUp,
+  Users,
+  Award,
+  Sparkles,
+  Shield,
+  BarChart3,
+  Zap,
+  Rocket,
+  DollarSign,
+  Star,
+  ArrowRight,
+} from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
-
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
