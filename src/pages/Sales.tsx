@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
-import { useState, useEffect, useRef, Suspense } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Carousel,
   CarouselContent,
@@ -35,127 +33,31 @@ import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
 import { HeroScene } from "@/components/3d/HeroScene";
 
-const HeroCarousel = () => {
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 600], [0, -150]);
-  const opacity = useTransform(scrollY, [0, 600], [1, 0]);
-
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
-
-  const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }));
+const AnimatedCounter = ({ end, duration = 2 }: { end: number; duration?: number }) => {
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!api) return;
-    setCurrent(api.selectedScrollSnap());
-    api.on("select", () => setCurrent(api.selectedScrollSnap()));
-  }, [api]);
+    let startTime: number;
+    let animationFrame: number;
 
-  const slides = [heroCarousel1, heroCarousel2, heroCarousel3];
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+      
+      setCount(Math.floor(progress * end));
 
-  return (
-    <section className="relative h-screen overflow-hidden">
-      {/* Carousel de fundo */}
-      <div className="absolute inset-0">
-        <Carousel
-          setApi={setApi}
-          plugins={[plugin.current]}
-          className="w-full h-full"
-          opts={{ loop: true }}
-        >
-          <CarouselContent className="h-screen">
-            {slides.map((src, index) => (
-              <CarouselItem key={index}>
-                <div className="relative w-full h-full">
-                  <img
-                    src={src}
-                    alt={`Slide ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop";
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
 
-      {/* 3D Scene flutuando */}
-      <div className="absolute inset-0 pointer-events-none">
-        <Suspense fallback={null}>
-          <HeroScene />
-        </Suspense>
-      </div>
+    animationFrame = requestAnimationFrame(animate);
 
-      {/* Conteúdo com parallax */}
-      <motion.div
-        style={{ y, opacity }}
-        className="absolute inset-0 flex items-center justify-center z-10"
-      >
-        <div className="container mx-auto px-6 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="text-6xl md:text-8xl font-black text-white drop-shadow-2xl mb-6"
-          >
-            Loja <span className="text-gradient-primary">SKY</span>
-          </motion.h1>
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration]);
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 1 }}
-            className="text-xl md:text-3xl text-white/90 mb-10 max-w-4xl mx-auto"
-          >
-            Produtos premium para transformar seu negócio digital
-          </motion.p>
-        </div>
-      </motion.div>
-
-      {/* Dots personalizados */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => api?.scrollTo(i)}
-            className={`transition-all duration-300 ${
-              current === i
-                ? "w-12 h-3 bg-white rounded-full shadow-lg shadow-white/50"
-                : "w-3 h-3 bg-white/50 rounded-full hover:bg-white/80"
-            }`}
-          />
-        ))}
-      </div>
-
-      {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20"
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-6 h-10 border-2 border-white/60 rounded-full flex justify-center"
-        >
-          <motion.div
-            animate={{ y: [0, 15, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-1 h-3 bg-white rounded-full mt-2"
-          />
-        </motion.div>
-      </motion.div>
-    </section>
-  );
+  return <span>{count}+</span>;
 };
-
-export default HeroCarousel;
-
 interface Product {
   id: number;
   name: string;
