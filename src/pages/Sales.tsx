@@ -8,39 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
-import { useState, useMemo, useRef, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import {
-  ShoppingCart,
-  Check,
-  Star,
-  Zap,
-  Filter,
-  ArrowRight,
-} from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCart } from "@/contexts/CartContext";
-
-// === CAROUSEL + 3D ===
 import {
   Carousel,
   CarouselContent,
@@ -49,98 +18,20 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
-// IMPORTS CORRETOS DAS IMAGENS (agora com fallback caso não carregue)
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
 import { HeroScene } from "@/components/3d/HeroScene";
 
-// ====================== PRODUTOS ======================
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  category: string;
-  featured?: boolean;
-  badge?: string;
-}
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Pacote Sky Starter",
-    description: "Ideal para começar sua jornada digital com as ferramentas essenciais.",
-    price: 497,
-    originalPrice: 997,
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
-    category: "Digital",
-    featured: true,
-    badge: "Mais Vendido",
-  },
-  {
-    id: 2,
-    name: "Pacote Sky Pro",
-    description: "Solução completa para profissionais que querem resultados extraordinários.",
-    price: 997,
-    originalPrice: 1997,
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
-    category: "Premium",
-    featured: true,
-    badge: "Recomendado",
-  },
-  {
-    id: 3,
-    name: "Consultoria Sky VIP",
-    description: "Atendimento personalizado com estratégias exclusivas para seu negócio.",
-    price: 2497,
-    image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=600&fit=crop",
-    category: "VIP",
-    badge: "Exclusivo",
-  },
-  {
-    id: 4,
-    name: "Pacote Sky Growth",
-    description: "Acelere seu crescimento com ferramentas avançadas de marketing digital.",
-    price: 1497,
-    originalPrice: 2497,
-    image: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&h=600&fit=crop",
-    category: "Premium",
-  },
-  {
-    id: 5,
-    name: "Sky Academy",
-    description: "Acesso completo à nossa plataforma de treinamentos e mentorias.",
-    price: 697,
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=600&fit=crop",
-    category: "Digital",
-  },
-  {
-    id: 6,
-    name: "Pacote Sky Enterprise",
-    description: "Soluções corporativas para empresas que buscam transformação digital.",
-    price: 4997,
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop",
-    category: "Enterprise",
-    badge: "Novo",
-  },
-];
-
-type SortOption = "relevance" | "price-asc" | "price-desc" | "popular" | "newest";
-type CategoryFilter = "all" | "Digital" | "Premium" | "VIP" | "Enterprise";
-
-const Sales = () => {
-  // CAROUSEL + PARALLAX
+const HeroCarousel = () => {
   const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, -100]);
-  const opacity1 = useTransform(scrollY, [0, 500], [1, 0]);
+  const y = useTransform(scrollY, [0, 600], [0, -150]);
+  const opacity = useTransform(scrollY, [0, 600], [1, 0]);
 
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
-  const plugin = useRef(Autoplay({ delay: 4500, stopOnInteraction: false }));
+  const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }));
 
   useEffect(() => {
     if (!api) return;
@@ -148,139 +39,110 @@ const Sales = () => {
     api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
 
-  // ESTADO DO CARRINHO E PRODUTOS
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
-  const [sortOption, setSortOption] = useState<SortOption>("relevance");
-  const { addItem } = useCart();
-
-  const handleBuyClick = (product: Product) => {
-    setSelectedProduct(product);
-    setIsDialogOpen(true);
-  };
-
-  const handleConfirmPurchase = () => {
-    if (selectedProduct) {
-      addItem({
-        id: selectedProduct.id,
-        name: selectedProduct.name,
-        price: selectedProduct.price,
-        image: selectedProduct.image,
-      });
-    }
-    setIsDialogOpen(false);
-  };
-
-  const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
-    if (categoryFilter !== "all") result = result.filter(p => p.category === categoryFilter);
-
-    switch (sortOption) {
-      case "price-asc": result.sort((a, b) => a.price - b.price); break;
-      case "price-desc": result.sort((a, b) => b.price - a.price); break;
-      case "popular": result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)); break;
-      case "newest": result.sort((a, b) => (b.badge === "Novo" ? 1 : 0) - (a.badge === "Novo" ? 1 : 0)); break;
-      default: result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
-    }
-    return result;
-  }, [categoryFilter, sortOption]);
+  const slides = [heroCarousel1, heroCarousel2, heroCarousel3];
 
   return (
-    <div className="min-h-screen bg-gradient-tech">
-      {/* HERO COM CAROUSEL 3D */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Carousel */}
-        <div className="absolute inset-0 -z-10">
-          <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full h-full" opts={{ loop: true }}>
-            <CarouselContent className="h-screen">
-              {[heroCarousel1, heroCarousel2, heroCarousel3].map((src, i) => (
-                <CarouselItem key={i} className="h-screen">
-                  <div className="relative w-full h-full">
-                    {/* Imagem com fallback caso não carregue */}
-                    <img
-                      src={src}
-                      alt={`Slide ${i + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop";
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+    <section className="relative h-screen overflow-hidden">
+      {/* Carousel de fundo */}
+      <div className="absolute inset-0">
+        <Carousel
+          setApi={setApi}
+          plugins={[plugin.current]}
+          className="w-full h-full"
+          opts={{ loop: true }}
+        >
+          <CarouselContent className="h-screen">
+            {slides.map((src, index) => (
+              <CarouselItem key={index}>
+                <div className="relative w-full h-full">
+                  <img
+                    src={src}
+                    alt={`Slide ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+
+      {/* 3D Scene flutuando */}
+      <div className="absolute inset-0 pointer-events-none">
+        <Suspense fallback={null}>
+          <HeroScene />
+        </Suspense>
+      </div>
+
+      {/* Conteúdo com parallax */}
+      <motion.div
+        style={{ y, opacity }}
+        className="absolute inset-0 flex items-center justify-center z-10"
+      >
+        <div className="container mx-auto px-6 text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            className="text-6xl md:text-8xl font-black text-white drop-shadow-2xl mb-6"
+          >
+            Loja <span className="text-gradient-primary">SKY</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 1 }}
+            className="text-xl md:text-3xl text-white/90 mb-10 max-w-4xl mx-auto"
+          >
+            Produtos premium para transformar seu negócio digital
+          </motion.p>
         </div>
+      </motion.div>
 
-        {/* 3D Scene */}
-        <div className="absolute inset-0 pointer-events-none z-10">
-          <Suspense fallback={null}>
-            <HeroScene />
-          </Suspense>
-        </div>
+      {/* Dots personalizados */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => api?.scrollTo(i)}
+            className={`transition-all duration-300 ${
+              current === i
+                ? "w-12 h-3 bg-white rounded-full shadow-lg shadow-white/50"
+                : "w-3 h-3 bg-white/50 rounded-full hover:bg-white/80"
+            }`}
+          />
+        ))}
+      </div>
 
-        {/* Conteúdo Hero */}
-        <motion.div style={{ y: y1, opacity: opacity1 }} className="container mx-auto px-6 relative z-20 text-center">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }} className="max-w-5xl mx-auto">
-            <Badge className="mb-8 text-lg px-8 py-4 bg-white/10 backdrop-blur-xl border-white/20 text-white">
-              <Zap className="w-6 h-6 mr-3 animate-pulse" />
-              Ofertas Exclusivas • Acesso Imediato
-            </Badge>
-
-            <motion.div className="relative">
-              <motion.div
-                className="absolute inset-0 text-7xl md:text-9xl font-black blur-3xl opacity-40 text-primary"
-                animate={{ opacity: [0.3, 0.6, 0.3] }}
-                transition={{ duration: 4, repeat: Infinity }}
-              >
-                Loja SKY
-              </motion.div>
-              <h1 className="text-6xl md:text-8xl font-black mb-8 leading-tight text-white drop-shadow-2xl">
-                Loja <span className="text-gradient-primary">SKY</span>
-              </h1>
-            </motion.div>
-
-            <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-              className="text-xl md:text-3xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed"
-            >
-              Produtos premium para <span className="font-bold text-primary">explodir seu negócio digital</span>
-              <br />
-              <span className="text-white/70">Acesso vitalício • Suporte VIP • Resultados reais</span>
-            </motion.p>
-
-            <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center"
-            >
-              <Button size="lg" className="text-lg px-12 py-8 bg-gradient-primary hover:shadow-glow-primary hover:scale-105 transition-all group">
-                Explorar Produtos
-                <motion.span animate={{ x: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                  <ArrowRight className="w-6 h-6 ml-3" />
-                </motion.span>
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-12 py-8 bg-white/10 backdrop-blur-xl border-white/30 text-white hover:bg-white/20">
-                Ver Demonstração
-              </Button>
-            </motion.div>
-          </motion.div>
+      {/* Scroll Indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5 }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20"
+      >
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-6 h-10 border-2 border-white/60 rounded-full flex justify-center"
+        >
+          <motion.div
+            animate={{ y: [0, 15, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="w-1 h-3 bg-white rounded-full mt-2"
+          />
         </motion.div>
+      </motion.div>
+    </section>
+  );
+};
 
-        {/* Dots + Scroll Indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-4">
-          {[0, 1, 2].map((i) => (
-            <button key={i} onClick={() => api?.scrollTo(i)}
-              className={`transition-all duration-500 ${current === i ? "w-16 h-4 bg-white rounded-full shadow-glow-primary" : "w-4 h-4 bg-white/40 rounded-full hover:bg-white/80"}`}
-            />
-          ))}
-        </div>
-
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
-          <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 2, repeat: Infinity }} className="w-7 h-12 border-2 border-white/50 rounded-full flex justify-center">
-            <motion.div animate={{ y: [0, 20, 0] }} transition={{ duration: 2, repeat: Infinity }} className="w-1.5 h-4 bg-white rounded-full mt-3" />
-          </motion.div>
-        </motion.div>
-      </section>
+export default HeroCarousel;
 
 interface Product {
   id: number;
