@@ -8,11 +8,75 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import {
+  Target,
+  TrendingUp,
+  Users,
+  Award,
+  Sparkles,
+  Shield,
+  BarChart3,
+  Zap,
+  Rocket,
+  DollarSign,
+  Star,
+  ArrowRight,
+} from "lucide-react";
+import Autoplay from "embla-carousel-autoplay";
+import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
+import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
+import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
+import { HeroScene } from "@/components/3d/HeroScene";
 
+const AnimatedCounter = ({ end, duration = 2 }: { end: number; duration?: number }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    let animationFrame: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+      
+      setCount(Math.floor(progress * end));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration]);
+
+  return <span>{count}+</span>;
+};
+
+const Home = () => {
+  const plugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: false })
+  );
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 300], [0, -50]);
+  const opacity1 = useTransform(scrollY, [0, 300], [1, 0]);
+
+  const carouselImages = [
+    { src: heroCarousel1, title: "Setup Profissional", subtitle: "Tecnologia de Ponta" },
+    { src: heroCarousel2, title: "Sucesso Garantido", subtitle: "Celebre suas Conquistas" },
+    { src: heroCarousel3, title: "Crescimento Exponencial", subtitle: "Dados e Estratégia" },
+  ];
 interface Product {
   id: number;
   name: string;
-  description: string;
+  description: string;  
   price: number;
   originalPrice?: number;
   image: string;
