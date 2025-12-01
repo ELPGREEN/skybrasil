@@ -14,6 +14,8 @@ import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useState, useEffect, useRef, Suspense } from "react";
 import { Button } from "@/components/ui/button";
+import { useState, useMemo, useRef, useEffect, Suspense } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ShoppingCart,
   Check,
@@ -44,7 +46,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
 
-// Carousel + 3D
+// === CAROUSEL + 3D ===
 import {
   Carousel,
   CarouselContent,
@@ -52,12 +54,14 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+
+// IMPORTS CORRETOS DAS IMAGENS (agora com fallback caso não carregue)
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
 import { HeroScene } from "@/components/3d/HeroScene";
 
-// ====================== DADOS DOS PRODUTOS ======================
+// ====================== PRODUTOS ======================
 interface Product {
   id: number;
   name: string;
@@ -77,7 +81,7 @@ const products: Product[] = [
     description: "Ideal para começar sua jornada digital com as ferramentas essenciais.",
     price: 497,
     originalPrice: 997,
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
     category: "Digital",
     featured: true,
     badge: "Mais Vendido",
@@ -88,7 +92,7 @@ const products: Product[] = [
     description: "Solução completa para profissionais que querem resultados extraordinários.",
     price: 997,
     originalPrice: 1997,
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
     category: "Premium",
     featured: true,
     badge: "Recomendado",
@@ -98,7 +102,7 @@ const products: Product[] = [
     name: "Consultoria Sky VIP",
     description: "Atendimento personalizado com estratégias exclusivas para seu negócio.",
     price: 2497,
-    image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=500&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=600&fit=crop",
     category: "VIP",
     badge: "Exclusivo",
   },
@@ -108,7 +112,7 @@ const products: Product[] = [
     description: "Acelere seu crescimento com ferramentas avançadas de marketing digital.",
     price: 1497,
     originalPrice: 2497,
-    image: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=500&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&h=600&fit=crop",
     category: "Premium",
   },
   {
@@ -116,7 +120,7 @@ const products: Product[] = [
     name: "Sky Academy",
     description: "Acesso completo à nossa plataforma de treinamentos e mentorias.",
     price: 697,
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=600&fit=crop",
     category: "Digital",
   },
   {
@@ -124,7 +128,7 @@ const products: Product[] = [
     name: "Pacote Sky Enterprise",
     description: "Soluções corporativas para empresas que buscam transformação digital.",
     price: 4997,
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop",
     category: "Enterprise",
     badge: "Novo",
   },
@@ -134,7 +138,7 @@ type SortOption = "relevance" | "price-asc" | "price-desc" | "popular" | "newest
 type CategoryFilter = "all" | "Digital" | "Premium" | "VIP" | "Enterprise";
 
 const Sales = () => {
-  // ================== CAROUSEL 3D + PARALLAX ==================
+  // CAROUSEL + PARALLAX
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, -100]);
   const opacity1 = useTransform(scrollY, [0, 500], [1, 0]);
@@ -149,8 +153,8 @@ const Sales = () => {
     setCurrent(api.selectedScrollSnap());
     api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
-  // ============================================================
 
+  // ESTADO DO CARRINHO E PRODUTOS
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
@@ -190,7 +194,7 @@ const Sales = () => {
 
   return (
     <div className="min-h-screen bg-gradient-tech">
-      {/* ================== HERO COM CAROUSEL 3D ================== */}
+      {/* HERO COM CAROUSEL 3D */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Carousel */}
         <div className="absolute inset-0 -z-10">
@@ -199,7 +203,15 @@ const Sales = () => {
               {[heroCarousel1, heroCarousel2, heroCarousel3].map((src, i) => (
                 <CarouselItem key={i} className="h-screen">
                   <div className="relative w-full h-full">
-                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    {/* Imagem com fallback caso não carregue */}
+                    <img
+                      src={src}
+                      alt={`Slide ${i + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=1080&fit=crop";
+                      }}
+                    />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
                   </div>
                 </CarouselItem>
@@ -215,14 +227,9 @@ const Sales = () => {
           </Suspense>
         </div>
 
-        {/* Conteúdo com parallax */}
+        {/* Conteúdo Hero */}
         <motion.div style={{ y: y1, opacity: opacity1 }} className="container mx-auto px-6 relative z-20 text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1 }}
-            className="max-w-5xl mx-auto"
-          >
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }} className="max-w-5xl mx-auto">
             <Badge className="mb-8 text-lg px-8 py-4 bg-white/10 backdrop-blur-xl border-white/20 text-white">
               <Zap className="w-6 h-6 mr-3 animate-pulse" />
               Ofertas Exclusivas • Acesso Imediato
@@ -241,10 +248,7 @@ const Sales = () => {
               </h1>
             </motion.div>
 
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
+            <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
               className="text-xl md:text-3xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed"
             >
               Produtos premium para <span className="font-bold text-primary">explodir seu negócio digital</span>
@@ -252,10 +256,7 @@ const Sales = () => {
               <span className="text-white/70">Acesso vitalício • Suporte VIP • Resultados reais</span>
             </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
+            <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
               className="flex flex-col sm:flex-row gap-6 justify-center"
             >
               <Button size="lg" className="text-lg px-12 py-8 bg-gradient-primary hover:shadow-glow-primary hover:scale-105 transition-all group">
@@ -271,18 +272,15 @@ const Sales = () => {
           </motion.div>
         </motion.div>
 
-        {/* Dots sincronizados */}
+        {/* Dots + Scroll Indicator */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-4">
           {[0, 1, 2].map((i) => (
-            <button
-              key={i}
-              onClick={() => api?.scrollTo(i)}
+            <button key={i} onClick={() => api?.scrollTo(i)}
               className={`transition-all duration-500 ${current === i ? "w-16 h-4 bg-white rounded-full shadow-glow-primary" : "w-4 h-4 bg-white/40 rounded-full hover:bg-white/80"}`}
             />
           ))}
         </div>
 
-        {/* Scroll Indicator */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
           <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 2, repeat: Infinity }} className="w-7 h-12 border-2 border-white/50 rounded-full flex justify-center">
             <motion.div animate={{ y: [0, 20, 0] }} transition={{ duration: 2, repeat: Infinity }} className="w-1.5 h-4 bg-white rounded-full mt-3" />
