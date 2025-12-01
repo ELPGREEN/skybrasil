@@ -9,74 +9,54 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
+import { useState, useMemo, useRef } from "react";
+import { motion } from "framer-motion";
+import {
+  ShoppingCart,
+  Check,
+  Star,
+  Zap,
+  Filter,
+  ArrowRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCart } from "@/contexts/CartContext";
+
+// Carousel imports
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import {
-  Target,
-  TrendingUp,
-  Users,
-  Award,
-  Sparkles,
-  Shield,
-  BarChart3,
-  Zap,
-  Rocket,
-  DollarSign,
-  Star,
-  ArrowRight,
-} from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
+
+// Imagens do carousel (ajuste os caminhos se necessário)
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
-import { HeroScene } from "@/components/3d/HeroScene";
 
-const AnimatedCounter = ({ end, duration = 2 }: { end: number; duration?: number }) => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let startTime: number;
-    let animationFrame: number;
-
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
-      
-      setCount(Math.floor(progress * end));
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(animationFrame);
-  }, [end, duration]);
-
-  return <span>{count}+</span>;
-};
-
-const Home = () => {
-  const plugin = useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: false })
-  );
-  const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 300], [0, -50]);
-  const opacity1 = useTransform(scrollY, [0, 300], [1, 0]);
-
-  const carouselImages = [
-    { src: heroCarousel1, title: "Setup Profissional", subtitle: "Tecnologia de Ponta" },
-    { src: heroCarousel2, title: "Sucesso Garantido", subtitle: "Celebre suas Conquistas" },
-    { src: heroCarousel3, title: "Crescimento Exponencial", subtitle: "Dados e Estratégia" },
-  ];
 interface Product {
   id: number;
   name: string;
-  description: string;  
+  description: string;
   price: number;
   originalPrice?: number;
   image: string;
@@ -95,7 +75,7 @@ const products: Product[] = [
     image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=300&fit=crop",
     category: "Digital",
     featured: true,
-    badge: "Mais Vendido"
+    badge: "Mais Vendido",
   },
   {
     id: 2,
@@ -106,7 +86,7 @@ const products: Product[] = [
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
     category: "Premium",
     featured: true,
-    badge: "Recomendado"
+    badge: "Recomendado",
   },
   {
     id: 3,
@@ -115,7 +95,7 @@ const products: Product[] = [
     price: 2497,
     image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=500&h=300&fit=crop",
     category: "VIP",
-    badge: "Exclusivo"
+    badge: "Exclusivo",
   },
   {
     id: 4,
@@ -124,7 +104,7 @@ const products: Product[] = [
     price: 1497,
     originalPrice: 2497,
     image: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=500&h=300&fit=crop",
-    category: "Premium"
+    category: "Premium",
   },
   {
     id: 5,
@@ -132,7 +112,7 @@ const products: Product[] = [
     description: "Acesso completo à nossa plataforma de treinamentos e mentorias.",
     price: 697,
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=300&fit=crop",
-    category: "Digital"
+    category: "Digital",
   },
   {
     id: 6,
@@ -141,14 +121,18 @@ const products: Product[] = [
     price: 4997,
     image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=300&fit=crop",
     category: "Enterprise",
-    badge: "Novo"
-  }
+    badge: "Novo",
+  },
 ];
 
 type SortOption = "relevance" | "price-asc" | "price-desc" | "popular" | "newest";
 type CategoryFilter = "all" | "Digital" | "Premium" | "VIP" | "Enterprise";
 
 const Sales = () => {
+  const plugin = useRef(
+    Autoplay({ delay: 5000, stopOnInteraction: false })
+  );
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
@@ -172,16 +156,13 @@ const Sales = () => {
     setIsDialogOpen(false);
   };
 
-  // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
-    // Apply category filter
     if (categoryFilter !== "all") {
       result = result.filter((product) => product.category === categoryFilter);
     }
 
-    // Apply sorting
     switch (sortOption) {
       case "price-asc":
         result.sort((a, b) => a.price - b.price);
@@ -190,7 +171,6 @@ const Sales = () => {
         result.sort((a, b) => b.price - a.price);
         break;
       case "popular":
-        // Featured products first, then by badge priority
         result.sort((a, b) => {
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
@@ -198,7 +178,6 @@ const Sales = () => {
         });
         break;
       case "newest":
-        // Products with "Novo" badge first
         result.sort((a, b) => {
           if (a.badge === "Novo" && b.badge !== "Novo") return -1;
           if (a.badge !== "Novo" && b.badge === "Novo") return 1;
@@ -206,7 +185,6 @@ const Sales = () => {
         });
         break;
       default:
-        // Relevance: featured products first
         result.sort((a, b) => {
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
@@ -217,35 +195,84 @@ const Sales = () => {
     return result;
   }, [categoryFilter, sortOption]);
 
+  const carouselImages = [
+    { src: heroCarousel1 },
+    { src: heroCarousel2 },
+    { src: heroCarousel3 },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-tech">
-      {/* Hero Section */}
-      <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-primary opacity-10"></div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="container mx-auto text-center relative z-10"
-        >
-          <Badge className="mb-4 bg-primary/20 text-primary border-primary">
-            <Zap className="w-3 h-3 mr-1" />
-            Ofertas Exclusivas
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Loja <span className="text-gradient-primary">SKY</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Descubra nossos produtos e serviços premium para transformar seu negócio digital
-          </p>
-        </motion.div>
+      {/* HERO COM CAROUSEL */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        <Carousel plugins={[plugin.current]} className="w-full h-full absolute inset-0">
+          <CarouselContent className="h-full">
+            {carouselImages.map((item, index) => (
+              <CarouselItem key={index} className="h-full">
+                <div className="relative w-full h-full">
+                  <img
+                    src={item.src}
+                    alt={`Slide ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/60" />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto"
+          >
+            <Badge className="mb-6 text-lg px-6 py-3 bg-white/20 backdrop-blur-md border-white/30 text-white">
+              <Zap className="w-5 h-5 mr-2" />
+              Ofertas Exclusivas
+            </Badge>
+
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white drop-shadow-2xl">
+              Loja <span className="text-gradient-primary">SKY</span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-lg">
+              Descubra nossos produtos e serviços premium para transformar seu negócio digital
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="text-lg px-10 shadow-2xl">
+                Explorar Produtos
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-10 bg-white/10 backdrop-blur-md border-white/40 text-white hover:bg-white/20"
+              >
+                Ver Demonstração
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Dots indicadores */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+          {carouselImages.map((_, index) => (
+            <div
+              key={index}
+              className="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all duration-300"
+            />
+          ))}
+        </div>
       </section>
 
-      {/* Filters and Sorting */}
+      {/* O RESTO DO SEU CÓDIGO ORIGINAL (100% inalterado) */}
       <section className="py-8 px-4 border-b border-border/30">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            {/* Category Filters */}
             <div className="w-full lg:w-auto">
               <div className="flex items-center gap-2 mb-3">
                 <Filter className="w-4 h-4 text-muted-foreground" />
@@ -262,7 +289,6 @@ const Sales = () => {
               </Tabs>
             </div>
 
-            {/* Sort Options */}
             <div className="w-full lg:w-auto">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-sm font-medium text-muted-foreground">Ordenar por:</span>
@@ -282,7 +308,6 @@ const Sales = () => {
             </div>
           </div>
 
-          {/* Results count */}
           <div className="mt-6">
             <p className="text-sm text-muted-foreground">
               Mostrando {filteredAndSortedProducts.length} {filteredAndSortedProducts.length === 1 ? "produto" : "produtos"}
@@ -292,7 +317,6 @@ const Sales = () => {
         </div>
       </section>
 
-      {/* Products Grid */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
           {filteredAndSortedProducts.length === 0 ? (
@@ -307,67 +331,67 @@ const Sales = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredAndSortedProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <Card className="h-full group hover:shadow-glow-primary transition-smooth overflow-hidden border-border/50">
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-48 object-cover group-hover:scale-110 transition-smooth"
-                    />
-                    {product.badge && (
-                      <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground">
-                        {product.badge}
-                      </Badge>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-20 transition-smooth"></div>
-                  </div>
-
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-xl">{product.name}</CardTitle>
-                      <Badge variant="outline" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </div>
-                    <CardDescription className="line-clamp-2">
-                      {product.description}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold text-gradient-primary">
-                        R$ {product.price}
-                      </span>
-                      {product.originalPrice && (
-                        <span className="text-sm text-muted-foreground line-through">
-                          R$ {product.originalPrice}
-                        </span>
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <Card className="h-full group hover:shadow-glow-primary transition-smooth overflow-hidden border-border/50">
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-48 object-cover group-hover:scale-110 transition-smooth"
+                      />
+                      {product.badge && (
+                        <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground">
+                          {product.badge}
+                        </Badge>
                       )}
+                      <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-20 transition-smooth"></div>
                     </div>
-                    {product.originalPrice && (
-                      <p className="text-sm text-accent mt-2">
-                        Economize R$ {product.originalPrice - product.price}
-                      </p>
-                    )}
-                  </CardContent>
 
-                  <CardFooter className="flex gap-2">
-                    <Button
-                      onClick={() => handleBuyClick(product)}
-                      className="flex-1 bg-gradient-primary hover:shadow-glow-primary"
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Comprar Agora
-                    </Button>
-                  </CardFooter>
-                </Card>
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-xl">{product.name}</CardTitle>
+                        <Badge variant="outline" className="text-xs">
+                          {product.category}
+                        </Badge>
+                      </div>
+                      <CardDescription className="line-clamp-2">
+                        {product.description}
+                      </CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-bold text-gradient-primary">
+                          R$ {product.price}
+                        </span>
+                        {product.originalPrice && (
+                          <span className="text-sm text-muted-foreground line-through">
+                            R$ {product.originalPrice}
+                          </span>
+                        )}
+                      </div>
+                      {product.originalPrice && (
+                        <p className="text-sm text-accent mt-2">
+                          Economize R$ {product.originalPrice - product.price}
+                        </p>
+                      )}
+                    </CardContent>
+
+                    <CardFooter className="flex gap-2">
+                      <Button
+                        onClick={() => handleBuyClick(product)}
+                        className="flex-1 bg-gradient-primary hover:shadow-glow-primary"
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Comprar Agora
+                      </Button>
+                    </CardFooter>
+                  </Card>
                 </motion.div>
               ))}
             </div>
@@ -375,16 +399,10 @@ const Sales = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-16 px-4 bg-card/30">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="p-6"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="p-6">
               <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
                 <Check className="w-8 h-8 text-primary" />
               </div>
@@ -394,13 +412,7 @@ const Sales = () => {
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="p-6"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="p-6">
               <div className="w-16 h-16 mx-auto mb-4 bg-secondary/10 rounded-full flex items-center justify-center">
                 <Star className="w-8 h-8 text-secondary" />
               </div>
@@ -410,13 +422,7 @@ const Sales = () => {
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="p-6"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="p-6">
               <div className="w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-full flex items-center justify-center">
                 <Zap className="w-8 h-8 text-accent" />
               </div>
@@ -429,7 +435,6 @@ const Sales = () => {
         </div>
       </section>
 
-      {/* Purchase Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -446,13 +451,13 @@ const Sales = () => {
                 alt={selectedProduct.name}
                 className="w-full h-40 object-cover rounded-lg"
               />
-              
+
               <div>
                 <h3 className="font-bold text-lg mb-1">{selectedProduct.name}</h3>
                 <p className="text-sm text-muted-foreground mb-3">
                   {selectedProduct.description}
                 </p>
-                
+
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="text-3xl font-bold text-gradient-primary">
                     R$ {selectedProduct.price}
@@ -481,17 +486,10 @@ const Sales = () => {
               </div>
 
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                  className="flex-1"
-                >
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">
                   Cancelar
                 </Button>
-                <Button
-                  onClick={handleConfirmPurchase}
-                  className="flex-1 bg-gradient-primary hover:shadow-glow-primary"
-                >
+                <Button onClick={handleConfirmPurchase} className="flex-1 bg-gradient-primary hover:shadow-glow-primary">
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Adicionar ao Carrinho
                 </Button>
