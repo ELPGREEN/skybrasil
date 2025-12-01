@@ -10,6 +10,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
 import { useState, useMemo, useRef, useEffect, Suspense } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { Button } from "@/components/ui/button";
 import {
   ShoppingCart,
   Check,
