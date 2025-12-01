@@ -8,9 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
-import { Button } from "@/components/ui/button";
-import { useState, useMemo, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useMemo, useRef, useEffect, Suspense } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ShoppingCart,
   Check,
@@ -40,18 +39,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
 
-// Carousel imports
+// === CAROUSEL + 3D IMPORTS ===
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-
-// Imagens do carousel (ajuste os caminhos se necessário)
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
+import { HeroScene } from "@/components/3d/HeroScene";
+// ============================
 
 interface Product {
   id: number;
@@ -129,9 +129,22 @@ type SortOption = "relevance" | "price-asc" | "price-desc" | "popular" | "newest
 type CategoryFilter = "all" | "Digital" | "Premium" | "VIP" | "Enterprise";
 
 const Sales = () => {
-  const plugin = useRef(
-    Autoplay({ delay: 5000, stopOnInteraction: false })
-  );
+  // === CAROUSEL 3D + PARALLAX ===
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 500], [0, -100]);
+  const opacity1 = useTransform(scrollY, [0, 500], [1, 0]);
+
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+
+  const plugin = useRef(Autoplay({ delay: 4500, stopOnInteraction: false }));
+
+  useEffect(() => {
+    if (!api) return;
+    setCurrent(api.selectedScrollSnap());
+    api.on("select", () => setCurrent(api.selectedScrollSnap()));
+  }, [api]);
+  // ===============================
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -158,118 +171,135 @@ const Sales = () => {
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
-
     if (categoryFilter !== "all") {
-      result = result.filter((product) => product.category === categoryFilter);
+      result = result.filter((p) => p.category === categoryFilter);
     }
-
     switch (sortOption) {
-      case "price-asc":
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case "popular":
-        result.sort((a, b) => {
-          if (a.featured && !b.featured) return -1;
-          if (!a.featured && b.featured) return 1;
-          return 0;
-        });
-        break;
-      case "newest":
-        result.sort((a, b) => {
-          if (a.badge === "Novo" && b.badge !== "Novo") return -1;
-          if (a.badge !== "Novo" && b.badge === "Novo") return 1;
-          return 0;
-        });
-        break;
-      default:
-        result.sort((a, b) => {
-          if (a.featured && !b.featured) return -1;
-          if (!a.featured && b.featured) return 1;
-          return 0;
-        });
+      case "price-asc": result.sort((a, b) => a.price - b.price); break;
+      case "price-desc": result.sort((a, b) => b.price - a.price); break;
+      case "popular": result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)); break;
+      case "newest": result.sort((a, b) => (b.badge === "Novo" ? 1 : 0) - (a.badge === "Novo" ? 1 : 0)); break;
+      default: result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     }
-
     return result;
   }, [categoryFilter, sortOption]);
 
-  const carouselImages = [
-    { src: heroCarousel1 },
-    { src: heroCarousel2 },
-    { src: heroCarousel3 },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-tech">
-      {/* HERO COM CAROUSEL */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <Carousel plugins={[plugin.current]} className="w-full h-full absolute inset-0">
-          <CarouselContent className="h-full">
-            {carouselImages.map((item, index) => (
-              <CarouselItem key={index} className="h-full">
-                <div className="relative w-full h-full">
-                  <img
-                    src={item.src}
-                    alt={`Slide ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/60" />
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto"
-          >
-            <Badge className="mb-6 text-lg px-6 py-3 bg-white/20 backdrop-blur-md border-white/30 text-white">
-              <Zap className="w-5 h-5 mr-2" />
-              Ofertas Exclusivas
-            </Badge>
-
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white drop-shadow-2xl">
-              Loja <span className="text-gradient-primary">SKY</span>
-            </h1>
-
-            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-lg">
-              Descubra nossos produtos e serviços premium para transformar seu negócio digital
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-10 shadow-2xl">
-                Explorar Produtos
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-lg px-10 bg-white/10 backdrop-blur-md border-white/40 text-white hover:bg-white/20"
-              >
-                Ver Demonstração
-              </Button>
-            </div>
-          </motion.div>
+      {/* HERO COM CAROUSEL 3D DA HOME */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Carousel de fundo */}
+        <div className="absolute inset-0 -z-10">
+          <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full h-full" opts={{ loop: true }}>
+            <CarouselContent className="h-screen">
+              {[heroCarousel1, heroCarousel2, heroCarousel3].map((src, i) => (
+                <CarouselItem key={i} className="h-screen">
+                  <div className="relative w-full h-full">
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </div>
 
-        {/* Dots indicadores */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
-          {carouselImages.map((_, index) => (
-            <div
-              key={index}
-              className="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all duration-300"
+        {/* 3D Scene */}
+        <div className="absolute inset-0 pointer-events-none z-10">
+          <Suspense fallback={null}>
+            <HeroScene />
+          </Suspense>
+        </div>
+
+        {/* Conteúdo com parallax */}
+        <motion.div style={{ y: y1, opacity: opacity1 }} className="container mx-auto px-6 relative z-20 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+            className="max-w-5xl mx-auto"
+          >
+            <Badge className="mb-8 text-lg px-8 py-4 bg-white/10 backdrop-blur-xl border-white/20 text-white">
+              <Zap className="w-6 h-6 mr-3 animate-pulse" />
+              Ofertas Exclusivas • Acesso Imediato
+            </Badge>
+
+            <motion.div className="relative">
+              <motion.div
+                className="absolute inset-0 text-7xl md:text-9xl font-black blur-3xl opacity-40 text-primary"
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              >
+                Loja SKY
+              </motion.div>
+              <h1 className="text-6xl md:text-8xl font-black mb-8 leading-tight text-white drop-shadow-2xl">
+                Loja <span className="text-gradient-primary">SKY</span>
+              </h1>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="text-xl md:text-3xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed"
+            >
+              Produtos premium para <span className="font-bold text-primary">explodir seu negócio digital</span>
+              <br />
+              <span className="text-white/70">Acesso vitalício • Suporte VIP • Resultados reais</span>
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="flex flex-col sm:flex-row gap-6 justify-center"
+            >
+              <Button size="lg" className="text-lg px-12 py-8 bg-gradient-primary hover:shadow-glow-primary hover:scale-105 transition-all group">
+                Explorar Produtos
+                <motion.span animate={{ x: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                  <ArrowRight className="w-6 h-6 ml-3" />
+                </motion.span>
+              </Button>
+              <Button size="lg" variant="outline" className="text-lg px-12 py-8 bg-white/10 backdrop-blur-xl border-white/30 text-white hover:bg-white/20">
+                Ver Demonstração
+              </Button>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+
+        {/* Dots sincronizados */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-4">
+          {[0, 1, 2].map((i) => (
+            <button
+              key={i}
+              onClick={() => api?.scrollTo(i)}
+              className={`transition-all duration-500 ${current === i ? "w-16 h-4 bg-white rounded-full shadow-glow-primary" : "w-4 h-4 bg-white/40 rounded-full hover:bg-white/80"}`}
             />
           ))}
         </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30"
+        >
+          <motion.div
+            animate={{ y: [0, 15, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-7 h-12 border-2 border-white/50 rounded-full flex justify-center"
+          >
+            <motion.div
+              animate={{ y: [0, 20, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-1.5 h-4 bg-white rounded-full mt-3"
+            />
+          </motion.div>
+        </motion.div>
       </section>
 
-      {/* O RESTO DO SEU CÓDIGO ORIGINAL (100% inalterado) */}
+      {/* === TODO O RESTO DO SEU CÓDIGO ORIGINAL (100% INALTERADO) === */}
       <section className="py-8 px-4 border-b border-border/30">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
@@ -446,26 +476,16 @@ const Sales = () => {
 
           {selectedProduct && (
             <div className="space-y-4">
-              <img
-                src={selectedProduct.image}
-                alt={selectedProduct.name}
-                className="w-full h-40 object-cover rounded-lg"
-              />
+              <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-40 object-cover rounded-lg" />
 
               <div>
                 <h3 className="font-bold text-lg mb-1">{selectedProduct.name}</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {selectedProduct.description}
-                </p>
+                <p className="text-sm text-muted-foreground mb-3">{selectedProduct.description}</p>
 
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-3xl font-bold text-gradient-primary">
-                    R$ {selectedProduct.price}
-                  </span>
+                  <span className="text-3xl font-bold text-gradient-primary">R$ {selectedProduct.price}</span>
                   {selectedProduct.originalPrice && (
-                    <span className="text-sm text-muted-foreground line-through">
-                      R$ {selectedProduct.originalPrice}
-                    </span>
+                    <span className="text-sm text-muted-foreground line-through">R$ {selectedProduct.originalPrice}</span>
                   )}
                 </div>
 
