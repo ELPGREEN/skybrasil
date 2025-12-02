@@ -8,10 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
+import { useState, useEffect, useRef, Suspense } from "react";;
 } from "@/components/ui/carousel";
 import {
   Target,
@@ -31,32 +28,79 @@ import Autoplay from "embla-carousel-autoplay";
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
-import { HeroScene } from "@/components/3d/HeroScene";
+module "c:/Users/elpgr/Documents/skybrasilagency-main/src/components/3d/HeroScene" {
+    let HeroScene: () => any;
+}
+const carouselImages = [
+  {
+    src: heroCarousel1,
+    title: "Setup Profissional",
+    subtitle: "Tecnologia de Ponta",
+  },
+  {
+    src: heroCarousel2,
+    title: "Sucesso Garantido",
+    subtitle: "Celebre suas Conquistas",
+  },
+  {
+    src: heroCarousel3,
+    title: "Crescimento Exponencial",
+    subtitle: "Dados e Estratégia",
+  },
+];
 
-const AnimatedCounter = ({ end, duration = 2 }: { end: number; duration?: number }) => {
-  const [count, setCount] = useState(0);
+// Dentro do seu componente Home:
+const Home = () => {
+  // Plugin do autoplay com ref (obrigatório para o embla-carousel-autoplay)
+  const plugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
+  );
 
-  useEffect(() => {
-    let startTime: number;
-    let animationFrame: number;
+  return (
+    <Carousel
+      plugins={[plugin.current]}
+      className="w-full overflow-hidden"
+      opts={{
+        loop: true,
+      }}
+    >
+      <CarouselContent>
+        {carouselImages.map((item, index) => (
+          <CarouselItem key={index} className="relative h-[500px] md:h-[650px] lg:h-[780px]">
+            <div className="absolute inset-0">
+              <img
+                src={item.src}
+                alt={item.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/50" />
+            </div>
 
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
-      
-      setCount(Math.floor(progress * end));
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(animationFrame);
-  }, [end, duration]);
-
-  return <span>{count}+</span>;
+            <div className="relative h-full flex items-center justify-center text-center text-white px-6">
+              <div className="max-w-4xl mx-auto">
+                <motion.h1
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4"
+                >
+                  {item.title}
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="text-xl md:text-3xl font-light mt-6"
+                >
+                  {item.subtitle}
+                </motion.p>
+              </div>
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
+  );
 };
 interface Product {
   id: number;
