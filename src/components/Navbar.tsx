@@ -10,10 +10,10 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "Sobre Nós", path: "/sobre" },
-    { name: "Para Streamers", path: "/streamers" },
-    { name: "Para Empresas", path: "/empresas" },
-    { name: "Como Funciona", path: "/como-funciona" },
+    { name: "Sobre", path: "/sobre" },
+    { name: "Streamers", path: "/streamers" },
+    { name: "Empresas", path: "/empresas" },
+    { name: "Funciona", path: "/como-funciona" },
     { name: "Plataforma", path: "/plataforma" },
     { name: "Vendas", path: "/vendas" },
     { name: "Blog", path: "/blog" },
