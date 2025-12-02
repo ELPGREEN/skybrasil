@@ -8,100 +8,61 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
-import { useState, useEffect, useRef, Suspense } from "react";;
-} from "@/components/ui/carousel";
+import { useState, useMemo, useRef } from "react";
+import { motion } from "framer-motion";
 import {
-  Target,
-  TrendingUp,
-  Users,
-  Award,
-  Sparkles,
-  Shield,
-  BarChart3,
-  Zap,
-  Rocket,
-  DollarSign,
+  ShoppingCart,
+  Check,
   Star,
+  Zap,
+  Filter,
   ArrowRight,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+
 import Autoplay from "embla-carousel-autoplay";
+import { useCart } from "@/contexts/CartContext";
+
+// Imagens do carrossel (ajuste o caminho se necessário)
 import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
 import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
 import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
-module "c:/Users/elpgr/Documents/skybrasilagency-main/src/components/3d/HeroScene" {
-    let HeroScene: () => any;
-}
-const carouselImages = [
-  {
-    src: heroCarousel1,
-    title: "Setup Profissional",
-    subtitle: "Tecnologia de Ponta",
-  },
-  {
-    src: heroCarousel2,
-    title: "Sucesso Garantido",
-    subtitle: "Celebre suas Conquistas",
-  },
-  {
-    src: heroCarousel3,
-    title: "Crescimento Exponencial",
-    subtitle: "Dados e Estratégia",
-  },
-];
 
-// Dentro do seu componente Home:
-const Home = () => {
-  // Plugin do autoplay com ref (obrigatório para o embla-carousel-autoplay)
-  const plugin = useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
-  );
-
-  return (
-    <Carousel
-      plugins={[plugin.current]}
-      className="w-full overflow-hidden"
-      opts={{
-        loop: true,
-      }}
-    >
-      <CarouselContent>
-        {carouselImages.map((item, index) => (
-          <CarouselItem key={index} className="relative h-[500px] md:h-[650px] lg:h-[780px]">
-            <div className="absolute inset-0">
-              <img
-                src={item.src}
-                alt={item.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/50" />
-            </div>
-
-            <div className="relative h-full flex items-center justify-center text-center text-white px-6">
-              <div className="max-w-4xl mx-auto">
-                <motion.h1
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4"
-                >
-                  {item.title}
-                </motion.h1>
-                <motion.p
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="text-xl md:text-3xl font-light mt-6"
-                >
-                  {item.subtitle}
-                </motion.p>
-              </div>
-            </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-    </Carousel>
-  );
-};
 interface Product {
   id: number;
   name: string;
@@ -246,7 +207,39 @@ const Sales = () => {
     return result;
   }, [categoryFilter, sortOption]);
 
-  return (
+   return (
+     <div className="min-h-screen overflow-hidden">
+       {/* Hero Section with 3D and Carousel */}
+       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+         {/* Background Carousel */}
+         <div className="absolute inset-0">
+           <Carousel
+             plugins={[plugin.current]}
+             className="w-full h-full"
+             opts={{ loop: true }}
+           >
+             <CarouselContent className="h-screen">
+               {carouselImages.map((image, index) => (
+                 <CarouselItem key={index} className="h-screen">
+                   <div className="relative w-full h-full">
+                     <img
+                       src={image.src}
+                       alt={image.title}
+                       className="w-full h-full object-cover"
+                     />
+                     <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/80 to-background" />
+                   </div>
+                 </CarouselItem>
+               ))}
+             </CarouselContent>
+           </Carousel>
+         </div>
+ 
+         {/* 3D Scene Overlay */}
+         <Suspense fallback={null}>
+           <HeroScene />
+         </Suspense>
+ 
     <div className="min-h-screen bg-gradient-tech">
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
