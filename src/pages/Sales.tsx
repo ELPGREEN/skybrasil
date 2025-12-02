@@ -8,60 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
-import { useState, useMemo, useRef } from "react";
-import { motion } from "framer-motion";
-import {
-  ShoppingCart,
-  Check,
-  Star,
-  Zap,
-  Filter,
-  ArrowRight,
-} from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-
-import Autoplay from "embla-carousel-autoplay";
-import { useCart } from "@/contexts/CartContext";
-
-// Imagens do carrossel (ajuste o caminho se necessário)
-import heroCarousel1 from "@/assets/hero-carousel-1.jpg";
-import heroCarousel2 from "@/assets/hero-carousel-2.jpg";
-import heroCarousel3 from "@/assets/hero-carousel-3.jpg";
 
 interface Product {
   id: number;
@@ -207,39 +153,7 @@ const Sales = () => {
     return result;
   }, [categoryFilter, sortOption]);
 
-   return (
-     <div className="min-h-screen overflow-hidden">
-       {/* Hero Section with 3D and Carousel */}
-       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-         {/* Background Carousel */}
-         <div className="absolute inset-0">
-           <Carousel
-             plugins={[plugin.current]}
-             className="w-full h-full"
-             opts={{ loop: true }}
-           >
-             <CarouselContent className="h-screen">
-               {carouselImages.map((image, index) => (
-                 <CarouselItem key={index} className="h-screen">
-                   <div className="relative w-full h-full">
-                     <img
-                       src={image.src}
-                       alt={image.title}
-                       className="w-full h-full object-cover"
-                     />
-                     <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/80 to-background" />
-                   </div>
-                 </CarouselItem>
-               ))}
-             </CarouselContent>
-           </Carousel>
-         </div>
- 
-         {/* 3D Scene Overlay */}
-         <Suspense fallback={null}>
-           <HeroScene />
-         </Suspense>
- 
+  return (
     <div className="min-h-screen bg-gradient-tech">
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
